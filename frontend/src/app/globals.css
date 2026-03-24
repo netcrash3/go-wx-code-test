@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+.forecast-tooltip {
+  padding: 0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.forecast-tooltip .leaflet-tooltip-content {
+  margin: 0;
+}
