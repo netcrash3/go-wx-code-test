@@ -9,12 +9,17 @@ import (
 	"go-wx/internal/api"
 )
 
+const (
+	EnvPort     = "PORT"
+	DefaultPort = "8080"
+)
+
 func main() {
 	_ = godotenv.Load()
 
-	port := os.Getenv("PORT")
+	port := os.Getenv(EnvPort)
 	if port == "" {
-		port = "8080"
+		port = DefaultPort
 	}
 
 	router := api.NewRouter()

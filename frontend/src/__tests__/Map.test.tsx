@@ -44,6 +44,7 @@ describe("Map component", () => {
     originalGeolocation = navigator.geolocation;
     jest.resetAllMocks();
     global.fetch = jest.fn();
+    process.env.NEXT_PUBLIC_API_URL = "http://localhost:8080";
   });
 
   afterEach(() => {

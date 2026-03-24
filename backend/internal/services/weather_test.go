@@ -10,29 +10,29 @@ import (
 )
 
 func TestCharacterizeTemp_Hot(t *testing.T) {
-	if got := characterizeTemp(76); got != "hot" {
-		t.Errorf("expected 'hot' for 76, got '%s'", got)
+	if got := characterizeTemp(76); got != TempCharacterizationHot {
+		t.Errorf("expected '%s' for 76, got '%s'", TempCharacterizationHot, got)
 	}
 }
 
 func TestCharacterizeTemp_Cold(t *testing.T) {
-	if got := characterizeTemp(49); got != "cold" {
-		t.Errorf("expected 'cold' for 49, got '%s'", got)
+	if got := characterizeTemp(49); got != TempCharacterizationCold {
+		t.Errorf("expected '%s' for 49, got '%s'", TempCharacterizationCold, got)
 	}
-	if got := characterizeTemp(0); got != "cold" {
-		t.Errorf("expected 'cold' for 0, got '%s'", got)
+	if got := characterizeTemp(0); got != TempCharacterizationCold {
+		t.Errorf("expected '%s' for 0, got '%s'", TempCharacterizationCold, got)
 	}
 }
 
 func TestCharacterizeTemp_Moderate(t *testing.T) {
-	if got := characterizeTemp(50); got != "moderate" {
-		t.Errorf("expected 'moderate' for 50, got '%s'", got)
+	if got := characterizeTemp(50); got != TempCharacterizationModerate {
+		t.Errorf("expected '%s' for 50, got '%s'", TempCharacterizationModerate, got)
 	}
-	if got := characterizeTemp(75); got != "moderate" {
-		t.Errorf("expected 'moderate' for 75, got '%s'", got)
+	if got := characterizeTemp(75); got != TempCharacterizationModerate {
+		t.Errorf("expected '%s' for 75, got '%s'", TempCharacterizationModerate, got)
 	}
-	if got := characterizeTemp(65); got != "moderate" {
-		t.Errorf("expected 'moderate' for 65, got '%s'", got)
+	if got := characterizeTemp(65); got != TempCharacterizationModerate {
+		t.Errorf("expected '%s' for 65, got '%s'", TempCharacterizationModerate, got)
 	}
 }
 
@@ -57,7 +57,7 @@ func TestGetTodayForecast_EmptyForecastURL(t *testing.T) {
 	defer server.Close()
 
 	svc := &WeatherService{client: server.Client()}
-	original := nwsBaseURL
+	original := NWSBaseURL
 	// We can't override the const, so test via getForecastURL indirectly
 	// by testing getJSON + the empty check
 	points, err := getJSON[models.NWSPointsResponse](svc, server.URL+"/points/0,0")
@@ -251,8 +251,8 @@ func TestGetTodayForecast_EndToEnd(t *testing.T) {
 	if result.Temperature != 82 {
 		t.Errorf("expected 82, got %d", result.Temperature)
 	}
-	if result.TemperatureCharacterization != "hot" {
-		t.Errorf("expected 'hot', got '%s'", result.TemperatureCharacterization)
+	if result.TemperatureCharacterization != TempCharacterizationHot {
+		t.Errorf("expected '%s', got '%s'", TempCharacterizationHot, result.TemperatureCharacterization)
 	}
 }
 

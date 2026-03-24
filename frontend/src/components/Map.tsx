@@ -26,8 +26,15 @@ L.Icon.Default.mergeOptions({
 const US_CENTER: L.LatLngExpression = [39.8283, -98.5795];
 const DEFAULT_ZOOM = 4;
 const LOCATION_ZOOM = 10;
+const FORECAST_ENDPOINT = "/api/forecast";
+const FORECAST_UNAVAILABLE_TEXT = "Unavailable";
+const FORECAST_UNAVAILABLE_ERROR = "Forecast unavailable";
+const DEFAULT_TEMPERATURE_UNIT = "F";
+const UNKNOWN_CHARACTERIZATION = "unknown";
+const FORECAST_TOOLTIP_CLASS = "forecast-tooltip";
+const TOOLTIP_MIN_WIDTH = 200;
 
-interface Forecast {
+interface IForecast {
   shortForecast: string;
   temperature: number;
   temperatureUnit: string;
@@ -47,15 +54,15 @@ function MapClickHandler({
 }: {
   onMapClick: (lat: number, lon: number) => void;
 }) {
-  const draggedRef = useRef(false);
+  const isDraggedRef = useRef(false);
 
   useMapEvents({
     dragstart() {
-      draggedRef.current = true;
+      isDraggedRef.current = true;
     },
     click(e) {
-      if (draggedRef.current) {
-        draggedRef.current = false;
+      if (isDraggedRef.current) {
+        isDraggedRef.current = false;
         return;
       }
       onMapClick(e.latlng.lat, e.latlng.lng);
@@ -69,7 +76,7 @@ function ForecastMarker({
   forecast,
 }: {
   position: [number, number];
-  forecast: Forecast | null;
+  forecast: IForecast | null;
 }) {
   const markerRef = useRef<L.Marker>(null);
 
@@ -85,7 +92,7 @@ function ForecastMarker({
         direction="top"
         offset={[0, -30]}
         permanent={false}
-        className="forecast-tooltip"
+        className={FORECAST_TOOLTIP_CLASS}
       >
         {!forecast ? (
           <span className="inline-flex items-center justify-center p-4">
@@ -111,7 +118,7 @@ function ForecastMarker({
             </svg>
           </span>
         ) : (
-          <div className="flex items-center gap-3 p-1" style={{ minWidth: 200 }}>
+          <div className="flex items-center gap-3 p-1" style={{ minWidth: TOOLTIP_MIN_WIDTH }}>
             <span className="text-4xl leading-none" role="img" aria-label={forecast.shortForecast}>
               {getWeatherIcon(forecast.shortForecast)}
             </span>
@@ -133,24 +140,24 @@ function ForecastMarker({
 
 export default function Map() {
   const [pinPosition, setPinPosition] = useState<[number, number] | null>(null);
-  const [forecast, setForecast] = useState<Forecast | null>(null);
-  const [initialFly, setInitialFly] = useState(false);
+  const [forecast, setForecast] = useState<IForecast | null>(null);
+  const [isInitialFly, setIsInitialFly] = useState(false);
 
   const fetchForecast = useCallback((lat: number, lon: number) => {
     setForecast(null);
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-    fetch(`${apiUrl}/api/forecast?lat=${lat}&lon=${lon}`)
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    fetch(`${apiUrl}${FORECAST_ENDPOINT}?lat=${lat}&lon=${lon}`)
       .then((res) => {
-        if (!res.ok) throw new Error("Forecast unavailable");
+        if (!res.ok) throw new Error(FORECAST_UNAVAILABLE_ERROR);
         return res.json();
       })
-      .then((data: Forecast) => setForecast(data))
+      .then((data: IForecast) => setForecast(data))
       .catch(() =>
         setForecast({
-          shortForecast: "Unavailable",
+          shortForecast: FORECAST_UNAVAILABLE_TEXT,
           temperature: 0,
-          temperatureUnit: "F",
-          temperatureCharacterization: "unknown",
+          temperatureUnit: DEFAULT_TEMPERATURE_UNIT,
+          temperatureCharacterization: UNKNOWN_CHARACTERIZATION,
         })
       );
   }, []);
@@ -163,7 +170,7 @@ export default function Map() {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
         setPinPosition([lat, lon]);
-        setInitialFly(true);
+        setIsInitialFly(true);
         fetchForecast(lat, lon);
       },
       () => {
@@ -175,7 +182,7 @@ export default function Map() {
   const handleMapClick = useCallback(
     (lat: number, lon: number) => {
       setPinPosition([lat, lon]);
-      setInitialFly(false);
+      setIsInitialFly(false);
       fetchForecast(lat, lon);
     },
     [fetchForecast]
@@ -192,7 +199,7 @@ export default function Map() {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <MapClickHandler onMapClick={handleMapClick} />
-      {pinPosition && initialFly && <FlyToLocation position={pinPosition} />}
+      {pinPosition && isInitialFly && <FlyToLocation position={pinPosition} />}
       {pinPosition && (
         <ForecastMarker position={pinPosition} forecast={forecast} />
       )}

@@ -8,6 +8,8 @@ import (
 	"go-wx/internal/models"
 )
 
+const StatusOK = "ok"
+
 func HealthCheck(c *gin.Context) {
-	c.JSON(http.StatusOK, models.HealthResponse{Status: "ok"})
+	c.JSON(http.StatusOK, models.HealthResponse{Status: StatusOK})
 }

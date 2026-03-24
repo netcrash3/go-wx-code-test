@@ -9,7 +9,19 @@ import (
 	"go-wx/internal/models"
 )
 
-const nwsBaseURL = "https://api.weather.gov"
+const (
+	NWSBaseURL = "https://api.weather.gov"
+
+	HeaderUserAgent = "User-Agent"
+	HeaderAccept    = "Accept"
+
+	UserAgentValue = "go-wx-app"
+	AcceptValue    = "application/geo+json"
+
+	TempCharacterizationHot      = "hot"
+	TempCharacterizationCold     = "cold"
+	TempCharacterizationModerate = "moderate"
+)
 
 type WeatherService struct {
 	client *http.Client
@@ -41,7 +53,7 @@ func (s *WeatherService) GetTodayForecast(lat, lon float64) (*models.ForecastRes
 }
 
 func (s *WeatherService) getForecastURL(lat, lon float64) (string, error) {
-	url := fmt.Sprintf("%s/points/%.4f,%.4f", nwsBaseURL, lat, lon)
+	url := fmt.Sprintf("%s/points/%.4f,%.4f", NWSBaseURL, lat, lon)
 
 	points, err := getJSON[models.NWSPointsResponse](s, url)
 	if err != nil {
@@ -79,8 +91,8 @@ func getJSON[T any](s *WeatherService, url string) (*T, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "go-wx-app")
-	req.Header.Set("Accept", "application/geo+json")
+	req.Header.Set(HeaderUserAgent, UserAgentValue)
+	req.Header.Set(HeaderAccept, AcceptValue)
 
 	resp, err := s.client.Do(req)
 	if err != nil {
@@ -103,10 +115,10 @@ func getJSON[T any](s *WeatherService, url string) (*T, error) {
 func characterizeTemp(tempF int) string {
 	switch {
 	case tempF > 75:
-		return "hot"
+		return TempCharacterizationHot
 	case tempF < 50:
-		return "cold"
+		return TempCharacterizationCold
 	default:
-		return "moderate"
+		return TempCharacterizationModerate
 	}
 }
